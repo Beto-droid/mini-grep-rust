@@ -1,0 +1,1 @@
+/Users/alberto/Documents/rust_projects_or_mini_tests/minigrep/target/debug/minigrep: /Users/alberto/Documents/rust_projects_or_mini_tests/minigrep/src/lib.rs /Users/alberto/Documents/rust_projects_or_mini_tests/minigrep/src/main.rs
