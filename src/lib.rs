@@ -1,10 +1,10 @@
 use std::error::Error;
-use std::{fs, env};
+use std::{env, fs};
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.file_path)?;
     let results = if config.ignore_case {
-       search_case_insensitive(&config.query, &contents)
+        search_case_insensitive(&config.query, &contents)
     } else {
         search(&config.query, &contents)
     };
@@ -23,37 +23,52 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
+    pub fn build(mut args1: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+        args1.next();
+        let query = match args1.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+        let file_path = match args1.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
         let ignore_case = env::var("IGNORE_CASE").is_ok();
+
         Ok(Config {
-            query: args[1].clone(),
-            file_path: args[2].clone(),
-            ignore_case: ignore_case,
+            query,
+            file_path,
+            ignore_case,
         })
     }
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
-    for lines in contents.lines() {
-        if lines.contains(query) {
-            results.push(lines.trim())
-        }
-    }
-    results
+    // let mut results = Vec::new();
+    // for lines in contents.lines() {
+    //     if lines.contains(query) {
+    //         results.push(lines.trim())
+    //     }
+    // }
+    // results
+    contents
+        .lines()
+        .filter(|line_from_content| line_from_content.contains(query))
+        .collect()
 }
 
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
-    for lines in contents.lines() {
-        if lines.to_lowercase().contains(&query.to_lowercase()) {
-            results.push(lines.trim())
-        }
-    }
-    results
+    // let mut results = Vec::new();
+    // for lines in contents.lines() {
+    //     if lines.to_lowercase().contains(&query.to_lowercase()) {
+    //         results.push(lines.trim())
+    //     }
+    // }
+    // results
+    contents
+        .lines()
+        .filter(|lines| lines.to_lowercase().contains(&query.to_lowercase()))
+        .collect()
 }
 
 #[cfg(test)]
